@@ -1,0 +1,122 @@
+run:
+  # include test files or not, default is true
+  tests: false
+
+linters:
+  enable:
+    - deadcode # Finds unused code.
+    - errcheck # Checks for unchecked errors in api programs.
+    - gosimple # Linter for Go source code that specializes in simplifying a code.
+    - govet # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string.
+    - ineffassign # Detects when assignments to existing variables are not used.
+    - staticcheck # Staticcheck is a api vet on steroids, applying a ton of static analysis checks.
+    - structcheck # Finds unused struct fields.
+    - typecheck # Like the front-end of a Go compiler, parses and type-checks Go code.
+    - unused # Checks for unused constants, variables, functions and types.
+    - varcheck # Finds unused global variables and constants.
+    - asciicheck # Simple linter to check that your code does not contain non-ASCII identifiers
+    - bodyclose # Checks whether HTTP response body is closed successfully.
+    - errorlint # go-errorlint is a source code linter for Go software that can be used to find code that will cause problems with the error wrapping scheme introduced in Go 1.13.
+    - misspell # Finds commonly misspelled English words in comments.
+    - unconvert # Remove unnecessary type conversions.
+    - unparam # Reports unused function parameters
+    - whitespace # Tool for detection of leading and trailing whitespace.
+    - stylecheck # Stylecheck is a replacement for golint.
+    - gochecknoinits # Checks that no init functions are present in Go code.
+    - goconst # Finds repeated strings that could be replaced by a constant.
+    - gocritic # The most opinionated Go source code linter.
+    - godot # Check if comments end in a period.
+    - gofmt # Gofmt checks whether code was gofmt-ed.
+    - goimports # Goimports does everything that gofmt does. Additionally it checks unused imports.
+    - revive # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
+    - gosec # Inspects source code for security problems.
+    - prealloc # Finds slice declarations that could potentially be preallocated.
+    - depguard # Go linter that checks if package imports are in a list of acceptable packages.
+    - dupl # Tool for code clone detection.
+    - nakedret # Finds naked returns in functions greater than a specified function length.
+    - gocognit # Computes and checks the cognitive complexity of functions.
+    - gocyclo # Computes and checks the cyclomatic complexity of functions.
+    - exportloopref # checks for pointers to enclosing loop variables
+    - gochecknoinits # Checks that no init functions are present in Go code
+    - exhaustive # check exhaustiveness of enum switch statements
+    - goheader # Checks is file header matches to pattern
+    - gomodguard # Allow and block list linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations.
+    - nestif # Reports deeply nested if statements
+    - noctx # noctx finds sending http request without context.Context
+    - nolintlint # Reports ill-formed or insufficient nolint directives
+    - rowserrcheck # checks whether Err of rows is checked successfully
+    - sqlclosecheck # Checks that sql.Rows and sql.Stmt are closed.
+    - testpackage # linter that makes you use a separate _test package
+    - paralleltest # paralleltest detects missing usage of t.Parallel() method in your Go test
+    - tparallel # tparallel detects inappropriate usage of t.Parallel() method in your Go test codes
+  disable:
+    - wrapcheck # Checks that errors returned from external packages are wrapped.
+    - wsl # Whitespace Linter - Forces you to use empty lines!
+    - gochecknoglobals # check that no global variables exist
+    - forbidigo # Forbids identifiers
+    - gci # Gci control golang package import order and make it always deterministic.
+    - gofumpt # Gofumpt checks whether code was gofumpt-ed.
+    - goerr113 # Golang linter to check the errors handling expressions
+    - godox # Tool for detection of FIXME, TODO and other comment keywords
+    - gomnd # An analyzer to detect magic numbers.
+    - goprintffuncname # Checks that printf-like functions are named with f at the end
+    - lll # Reports long lines
+    - makezero # Finds slice declarations with non-zero initial length
+    - nlreturn # return checks for a new line before return and branch statements to increase code clarity
+    - thelper # thelper detects golang test helpers without t.Helper() call and checks the consistency of test helpers
+
+linters-settings:
+  golint:
+    # minimal confidence for issues, default is 0.8
+    min-confidence: 0.9
+
+  staticcheck:
+    go: "1.18"
+
+  revive:
+    # see https://github.com/mgechev/revive#available-rules for details.
+    ignore-generated-header: true
+    severity: warning
+    rules:
+      - name: indent-error-flow
+        severity: warning
+
+      - name: add-constant
+        severity: warning
+        arguments:
+          - maxLitCount: "5"
+            allowStrs: '""'
+            allowInts: "0,1,2,3,4,5,500"
+            allowFloats: "0.0,0.,1.0,1.,2.0,2.,0.95,0.99"
+
+  wrapcheck:
+    # An array of strings that specify substrings of signatures to ignore.
+    # If this set, it will override the default set of ignored signatures.
+    # See https://github.com/tomarrell/wrapcheck#configuration for more information.
+    ignoreSigs:
+      - ctx.Err(
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .Wrapf(
+      - .WithMessage(
+      - .WithMessagef(
+      - .WithStack(
+    ignorePackageGlobs:
+      - encoding/*
+      - github.com/pkg/*
+
+  wsl:
+    # See https://github.com/bombsimon/wsl/blob/master/doc/configuration.md for
+    # documentation of available settings. These are the defaults for golangci-lint.
+    allow-assign-and-anything: false
+    allow-assign-and-call: true
+    allow-cuddle-declarations: false
+    allow-multiline-assign: true
+    allow-separated-leading-comment: false
+    allow-trailing-comment: false
+    force-case-trailing-whitespace: 0
+    force-err-cuddling: false
+    force-short-decl-cuddling: false
+    strict-append: true
