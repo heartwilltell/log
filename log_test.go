@@ -92,3 +92,14 @@ func (w *testWriter) Write(p []byte) (n int, err error) {
 	}
 	return w.n, nil
 }
+
+func TestNewNopLog(t *testing.T) {
+	t.Run("Reflect type", func(t *testing.T) {
+		want := reflect.TypeOf(NopLog{})
+		got := reflect.TypeOf(NewNopLog())
+
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("Type mismatch; got := %v; want := %v", got, want)
+		}
+	})
+}

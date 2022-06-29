@@ -8,6 +8,12 @@ import (
 	"strings"
 )
 
+// compilation time check for interface implementation.
+var (
+	_ Logger = (*StdLog)(nil)
+	_ Logger = NopLog{}
+)
+
 const (
 	// ERR represents error logging level.
 	ERR Level = iota
@@ -52,9 +58,9 @@ type Error string
 
 func (e Error) Error() string { return string(e) }
 
-// NewStdLog returns a new instance of StdLog struct.
+// New returns a new instance of StdLog struct.
 // Takes variadic options which will be applied to StdLog.
-func NewStdLog(options ...Option) *StdLog {
+func New(options ...Option) *StdLog {
 	l := &StdLog{
 		err: log.New(os.Stderr, "\033[31mERR\033[0m: ", log.Ldate|log.Ltime),
 		wrn: log.New(os.Stderr, "\033[34mERR\033[0m: ", log.Ldate|log.Ltime),
@@ -69,6 +75,10 @@ func NewStdLog(options ...Option) *StdLog {
 
 	return l
 }
+
+// NewStdLog returns a new instance of StdLog struct.
+// Takes variadic options which will be applied to StdLog.
+func NewStdLog(options ...Option) *StdLog { return New(options...) }
 
 // StdLog represents wrapper around standard library logger
 // which implements Logger interface.
@@ -145,3 +155,14 @@ func ParseLevel(lvl string) (Level, error) {
 
 	return level, nil
 }
+
+// NopLog represents empty/disabled implementation of Logger interface.
+type NopLog struct{}
+
+// NewNopLog returns a new instance of NopLog.
+func NewNopLog() NopLog { return NopLog{} }
+
+func (l NopLog) Error(string, ...any)   {}
+func (l NopLog) Warning(string, ...any) {}
+func (l NopLog) Info(string, ...any)    {}
+func (l NopLog) Debug(string, ...any)   {}
