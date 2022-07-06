@@ -7,28 +7,6 @@ import (
 	"testing"
 )
 
-func TestLevel_String(t *testing.T) {
-	type tcase struct {
-		l    Level
-		want string
-	}
-
-	tests := map[string]tcase{
-		"Error":   {ERR, "Error"},
-		"Info":    {INF, "Info"},
-		"Warning": {WRN, "Warning"},
-		"Debug":   {DBG, "Debug"},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			if got := tc.l.String(); got != tc.want {
-				t.Errorf("String() = %v, want %v", got, tc.want)
-			}
-		})
-	}
-}
-
 func TestNew(t *testing.T) {
 	t.Run("NewStdLog()", func(t *testing.T) {
 		got := NewStdLog()
@@ -74,6 +52,66 @@ func TestNew(t *testing.T) {
 			t.Errorf("all default writers should be os.Stderr")
 		}
 	})
+
+	t.Run("NewStdLog(WithLevel)", func(t *testing.T) {
+		got := NewStdLog(WithLevel(ERR))
+		if got.lvl != ERR {
+			t.Errorf("default log lvl should be INF but got %s", got.lvl.String())
+		}
+
+		if got.err.Writer() != os.Stderr || got.inf.Writer() != os.Stderr || got.dbg.Writer() != os.Stderr {
+			t.Errorf("all default writers should be os.Stderr")
+		}
+
+		if !reflect.TypeOf(got).Implements(reflect.TypeOf((*Logger)(nil)).Elem()) {
+			t.Errorf("type does't implement logger.Logger interface")
+		}
+
+		if reflect.TypeOf(*got).Name() != "StdLog" {
+			t.Errorf("type name should be StdLog but got: %s", reflect.TypeOf(*got).Name())
+		}
+
+		if reflect.TypeOf(got).String() != "*log.StdLog" {
+			t.Errorf("struct type returned by NewStdLog() should have name *log.StdLog but got: %s", reflect.TypeOf(got).String())
+		}
+
+		if reflect.TypeOf(*got).Kind() != reflect.Struct {
+			t.Errorf("type kind returned by NewStdLog() should be struct but got: %s", reflect.TypeOf(got).Kind())
+		}
+	})
+}
+
+func TestNewNopLog(t *testing.T) {
+	t.Run("Reflect type", func(t *testing.T) {
+		want := reflect.TypeOf(NopLog{})
+		got := reflect.TypeOf(NewNopLog())
+
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("Type mismatch; got := %v; want := %v", got, want)
+		}
+	})
+}
+
+func TestLevel_String(t *testing.T) {
+	type tcase struct {
+		l    Level
+		want string
+	}
+
+	tests := map[string]tcase{
+		"Error":   {ERR, "Error"},
+		"Info":    {INF, "Info"},
+		"Warning": {WRN, "Warning"},
+		"Debug":   {DBG, "Debug"},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got := tc.l.String(); got != tc.want {
+				t.Errorf("String() = %v, want %v", got, tc.want)
+			}
+		})
+	}
 }
 
 type testWriter struct {
