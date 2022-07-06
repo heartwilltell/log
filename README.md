@@ -5,6 +5,11 @@
 - 😮‍💨 No global logger
 - 👏 No structured logging bullshit
 
+## Documentation
+[![](https://goreportcard.com/badge/github.com/heartwilltell/log)](https://goreportcard.com/report/github.com/heartwilltell/log)
+[![](https://pkg.go.dev/badge/github.com/heartwilltell/log?utm_source=godoc)](https://pkg.go.dev/github.com/heartwilltell/log)
+
+
 ## Installation
 ```bash
 go get github.com/heartwilltell/log
