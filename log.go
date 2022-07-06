@@ -143,6 +143,7 @@ func WithLevel(level Level) Option { return func(l *StdLog) { l.lvl = level } }
 // ParseLevel takes the string and tries to parse it to the Level.
 func ParseLevel(lvl string) (Level, error) {
 	levels := map[string]Level{
+		strings.ToLower(WRN.String()): WRN,
 		strings.ToLower(ERR.String()): ERR,
 		strings.ToLower(INF.String()): INF,
 		strings.ToLower(DBG.String()): DBG,

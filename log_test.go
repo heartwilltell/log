@@ -7,28 +7,6 @@ import (
 	"testing"
 )
 
-func TestLevel_String(t *testing.T) {
-	type tcase struct {
-		l    Level
-		want string
-	}
-
-	tests := map[string]tcase{
-		"Error":   {ERR, "Error"},
-		"Info":    {INF, "Info"},
-		"Warning": {WRN, "Warning"},
-		"Debug":   {DBG, "Debug"},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			if got := tc.l.String(); got != tc.want {
-				t.Errorf("String() = %v, want %v", got, tc.want)
-			}
-		})
-	}
-}
-
 func TestNew(t *testing.T) {
 	t.Run("NewStdLog()", func(t *testing.T) {
 		got := NewStdLog()
@@ -76,6 +54,39 @@ func TestNew(t *testing.T) {
 	})
 }
 
+func TestNewNopLog(t *testing.T) {
+	t.Run("Reflect type", func(t *testing.T) {
+		want := reflect.TypeOf(NopLog{})
+		got := reflect.TypeOf(NewNopLog())
+
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("Type mismatch; got := %v; want := %v", got, want)
+		}
+	})
+}
+
+func TestLevel_String(t *testing.T) {
+	type tcase struct {
+		l    Level
+		want string
+	}
+
+	tests := map[string]tcase{
+		"Error":   {ERR, "Error"},
+		"Info":    {INF, "Info"},
+		"Warning": {WRN, "Warning"},
+		"Debug":   {DBG, "Debug"},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got := tc.l.String(); got != tc.want {
+				t.Errorf("String() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
 type testWriter struct {
 	n   int
 	byf []byte
@@ -91,15 +102,4 @@ func (w *testWriter) Write(p []byte) (n int, err error) {
 		w.n = i
 	}
 	return w.n, nil
-}
-
-func TestNewNopLog(t *testing.T) {
-	t.Run("Reflect type", func(t *testing.T) {
-		want := reflect.TypeOf(NopLog{})
-		got := reflect.TypeOf(NewNopLog())
-
-		if !reflect.DeepEqual(want, got) {
-			t.Errorf("Type mismatch; got := %v; want := %v", got, want)
-		}
-	})
 }
