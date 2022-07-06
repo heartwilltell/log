@@ -52,6 +52,33 @@ func TestNew(t *testing.T) {
 			t.Errorf("all default writers should be os.Stderr")
 		}
 	})
+
+	t.Run("NewStdLog(WithLevel)", func(t *testing.T) {
+		got := NewStdLog(WithLevel(ERR))
+		if got.lvl != ERR {
+			t.Errorf("default log lvl should be INF but got %s", got.lvl.String())
+		}
+
+		if got.err.Writer() != os.Stderr || got.inf.Writer() != os.Stderr || got.dbg.Writer() != os.Stderr {
+			t.Errorf("all default writers should be os.Stderr")
+		}
+
+		if !reflect.TypeOf(got).Implements(reflect.TypeOf((*Logger)(nil)).Elem()) {
+			t.Errorf("type does't implement logger.Logger interface")
+		}
+
+		if reflect.TypeOf(*got).Name() != "StdLog" {
+			t.Errorf("type name should be StdLog but got: %s", reflect.TypeOf(*got).Name())
+		}
+
+		if reflect.TypeOf(got).String() != "*log.StdLog" {
+			t.Errorf("struct type returned by NewStdLog() should have name *log.StdLog but got: %s", reflect.TypeOf(got).String())
+		}
+
+		if reflect.TypeOf(*got).Kind() != reflect.Struct {
+			t.Errorf("type kind returned by NewStdLog() should be struct but got: %s", reflect.TypeOf(got).Kind())
+		}
+	})
 }
 
 func TestNewNopLog(t *testing.T) {
