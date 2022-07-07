@@ -89,6 +89,7 @@ func New(options ...Option) *StdLog {
 
 // NewStdLog returns a new instance of StdLog struct.
 // Takes variadic options which will be applied to StdLog.
+// Deprecated: use New instead.
 func NewStdLog(options ...Option) *StdLog { return New(options...) }
 
 // StdLog represents wrapper around standard library logger
@@ -99,10 +100,6 @@ type StdLog struct {
 }
 
 func (l *StdLog) Error(format string, v ...any) {
-	if l.lvl < ERR {
-		return
-	}
-
 	l.err.Printf(format, v...)
 }
 

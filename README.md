@@ -23,13 +23,6 @@ logger := log.New()
 ```
 ###
 
-👇 Creates nop logger which implements `log.Logger` interface.
-```go
-logger := log.NewNopLog()
-```
-💡 _Useful for tests or places where logger should be disabled by default_
-###
-
 👇 Creates logger with `debug` level.
 ```go
 logger := log.New(log.WithLevel(log.DBG))
@@ -54,3 +47,11 @@ w := bytes.NewBuffer(buf)
 
 logger := log.New(log.WithWriter(w))
 ```
+###
+
+👇 Creates nop logger which implements `log.Logger` interface.
+```go
+logger := log.NewNopLog()
+```
+💡 _Useful for tests or places where logger should be disabled by default_
+###

@@ -3,6 +3,7 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -10,8 +11,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	t.Run("NewStdLog()", func(t *testing.T) {
-		got := NewStdLog()
+	t.Run("New()", func(t *testing.T) {
+		got := New()
 		if got.lvl != INF {
 			t.Errorf("default log lvl should be INF but got %s", got.lvl.String())
 		}
@@ -20,67 +21,109 @@ func TestNew(t *testing.T) {
 			t.Errorf("all default writers should be os.Stderr")
 		}
 
-		if !reflect.TypeOf(got).Implements(reflect.TypeOf((*Logger)(nil)).Elem()) {
-			t.Errorf("type does't implement logger.Logger interface")
-		}
-
-		if reflect.TypeOf(*got).Name() != "StdLog" {
-			t.Errorf("type name should be StdLog but got: %s", reflect.TypeOf(*got).Name())
-		}
-
-		if reflect.TypeOf(got).String() != "*log.StdLog" {
-			t.Errorf("struct type returned by NewStdLog() should have name *log.StdLog but got: %s", reflect.TypeOf(got).String())
-		}
-
-		if reflect.TypeOf(*got).Kind() != reflect.Struct {
-			t.Errorf("type kind returned by NewStdLog() should be struct but got: %s", reflect.TypeOf(got).Kind())
-		}
+		reflectStdLog(t, got)
 	})
 
-	t.Run("NewStdLog(WithWriter)", func(t *testing.T) {
+	t.Run("New(WithWriter)", func(t *testing.T) {
 		tb := &testWriter{byf: make([]byte, 0, 20)}
 		strToLog := "test string"
-		got := NewStdLog(WithWriter(tb))
+		got := New(WithWriter(tb))
 		got.Info(strToLog)
+
+		if got.err.Writer() != tb || got.inf.Writer() != tb || got.dbg.Writer() != tb {
+			t.Errorf("all default writers should be os.Stderr")
+		}
 
 		if !strings.Contains(tb.String(), strToLog) {
 			t.Errorf("expected %s but got %s", strToLog, tb.String())
 		}
 
-		if got.lvl != INF {
-			t.Errorf("default log lvl should be INF but got %s", got.lvl.String())
-		}
-		if got.err.Writer() != tb || got.inf.Writer() != tb || got.dbg.Writer() != tb {
-			t.Errorf("all default writers should be os.Stderr")
-		}
+		reflectStdLog(t, got)
 	})
 
-	t.Run("NewStdLog(WithLevel)", func(t *testing.T) {
-		got := NewStdLog(WithLevel(ERR))
+	t.Run("New(WithLevel)", func(t *testing.T) {
+		got := New(WithLevel(ERR))
 		if got.lvl != ERR {
-			t.Errorf("default log lvl should be INF but got %s", got.lvl.String())
+			t.Errorf("log lvl should be := ERR got := %s", got.lvl.String())
 		}
 
-		if got.err.Writer() != os.Stderr || got.inf.Writer() != os.Stderr || got.dbg.Writer() != os.Stderr {
-			t.Errorf("all default writers should be os.Stderr")
-		}
-
-		if !reflect.TypeOf(got).Implements(reflect.TypeOf((*Logger)(nil)).Elem()) {
-			t.Errorf("type does't implement logger.Logger interface")
-		}
-
-		if reflect.TypeOf(*got).Name() != "StdLog" {
-			t.Errorf("type name should be StdLog but got: %s", reflect.TypeOf(*got).Name())
-		}
-
-		if reflect.TypeOf(got).String() != "*log.StdLog" {
-			t.Errorf("struct type returned by NewStdLog() should have name *log.StdLog but got: %s", reflect.TypeOf(got).String())
-		}
-
-		if reflect.TypeOf(*got).Kind() != reflect.Struct {
-			t.Errorf("type kind returned by NewStdLog() should be struct but got: %s", reflect.TypeOf(got).Kind())
-		}
+		reflectStdLog(t, got)
 	})
+
+	t.Run("New(WithNoColor)", func(t *testing.T) {
+		got := New(WithNoColor())
+		if got.err.Prefix() != "ERR: " {
+			t.Errorf("Unexpected ERR prefix := %s, expcted := 'ERR: '", got.err.Prefix())
+		}
+
+		if got.wrn.Prefix() != "WRN: " {
+			t.Errorf("Unexpected WRN prefix := %s, expcted := 'WRN: '", got.wrn.Prefix())
+		}
+
+		if got.inf.Prefix() != "INF: " {
+			t.Errorf("Unexpected INF prefix := %s, expcted := 'INF: '", got.inf.Prefix())
+		}
+
+		if got.dbg.Prefix() != "DBG: " {
+			t.Errorf("Unexpected DBG prefix := %s, expcted := 'DBG: '", got.dbg.Prefix())
+		}
+
+		reflectStdLog(t, got)
+	})
+
+	t.Run("New(WithUTC)", func(t *testing.T) {
+		defaultFlags := log.Ldate | log.Ltime
+		got := New(WithUTC())
+
+		// Magic! I know. I also hate bitwise operators.
+		if (got.err.Flags() ^ log.LUTC) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		if (got.inf.Flags() ^ log.LUTC) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		if (got.dbg.Flags() ^ log.LUTC) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		if (got.wrn.Flags() ^ log.LUTC) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		reflectStdLog(t, got)
+	})
+
+	t.Run("New(WithLineNum(Short))", func(t *testing.T) {
+		defaultFlags := log.Ldate | log.Ltime
+		got := New(WithLineNum(Short))
+
+		// Magic! I know. I also hate bitwise operators.
+		if (got.err.Flags() ^ log.Lshortfile) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		reflectStdLog(t, got)
+	})
+
+	t.Run("New(WithLineNum(Long))", func(t *testing.T) {
+		defaultFlags := log.Ldate | log.Ltime
+		got := New(WithLineNum(Long))
+
+		// Magic! I know. I also hate bitwise operators.
+		if (got.err.Flags() ^ log.Llongfile) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		reflectStdLog(t, got)
+	})
+}
+
+func TestNewStdLog(t *testing.T) {
+	if !reflect.DeepEqual(NewStdLog(), New()) {
+		t.Errorf("Constructor values mismatch")
+	}
 }
 
 func TestLevelPrinting(t *testing.T) {
@@ -89,25 +132,24 @@ func TestLevelPrinting(t *testing.T) {
 	}
 
 	tests := map[string]tcase{
-		"DBG": {level: DBG},
-		"INF": {level: INF},
-		"WRN": {level: WRN},
-		"ERR": {level: ERR},
+		"DBG":  {level: DBG},
+		"INF":  {level: INF},
+		"WRN":  {level: WRN},
+		"ERR":  {level: ERR},
+		"ERR1": {level: Level(0)},
 	}
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var w bytes.Buffer
-			log := New(WithLevel(tc.level), WithWriter(&w))
-			log.Debug("debug")
-			log.Info("info")
-			log.Warning("warning")
-			log.Error("error")
+			logger := New(WithLevel(tc.level), WithWriter(&w))
+			logger.Debug("debug")
+			logger.Info("info")
+			logger.Warning("warning")
+			logger.Error("error")
 
 			lines := strings.Split(w.String(), "\n")
 			lines = lines[0 : len(lines)-1]
-
-			t.Log(lines)
 
 			switch tc.level {
 			case ERR:
@@ -168,18 +210,6 @@ func TestLevelPrinting(t *testing.T) {
 			}
 		})
 	}
-
-}
-
-func TestNewNopLog(t *testing.T) {
-	t.Run("Reflect type", func(t *testing.T) {
-		want := reflect.TypeOf(NopLog{})
-		got := reflect.TypeOf(NewNopLog())
-
-		if !reflect.DeepEqual(want, got) {
-			t.Errorf("Type mismatch; got := %v; want := %v", got, want)
-		}
-	})
 }
 
 func TestParseLevel(t *testing.T) {
@@ -234,6 +264,67 @@ func TestLevel_String(t *testing.T) {
 				t.Errorf("String() = %v, want %v", got, tc.want)
 			}
 		})
+	}
+}
+
+func TestNewNopLog(t *testing.T) {
+	logger := NewNopLog()
+
+	if !reflect.DeepEqual(logger, NopLog{}) {
+		t.Errorf("Type mismatch; got := %v; want := %v", logger, NopLog{})
+	}
+
+	if !reflect.TypeOf(logger).Implements(reflect.TypeOf((*Logger)(nil)).Elem()) {
+		t.Errorf("type does't implement logger.Logger interface")
+	}
+
+	if reflect.TypeOf(logger).Name() != "NopLog" {
+		t.Errorf("type name should be NopLog but got: %s", reflect.TypeOf(logger).Name())
+	}
+
+	if reflect.TypeOf(logger).String() != "log.NopLog" {
+		t.Errorf("struct type returned by () should have name *log.StdLog but got: %s", reflect.TypeOf(logger).String())
+	}
+
+	if reflect.TypeOf(logger).Kind() != reflect.Struct {
+		t.Errorf("type kind returned by () should be struct but got: %s", reflect.TypeOf(logger).Kind())
+	}
+}
+
+func TestNopLogPrinting(t *testing.T) {
+	type tcase struct {
+		method func(string, ...any)
+	}
+
+	tests := map[string]tcase{
+		"Info":    {method: NewNopLog().Info},
+		"Error":   {method: NewNopLog().Error},
+		"Warning": {method: NewNopLog().Warning},
+		"Debug":   {method: NewNopLog().Debug},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) { tc.method("") })
+	}
+}
+
+func reflectStdLog(t *testing.T, logger *StdLog) {
+	t.Helper()
+
+	if !reflect.TypeOf(logger).Implements(reflect.TypeOf((*Logger)(nil)).Elem()) {
+		t.Errorf("type does't implement logger.Logger interface")
+	}
+
+	if reflect.TypeOf(*logger).Name() != "StdLog" {
+		t.Errorf("type name should be StdLog but got: %s", reflect.TypeOf(logger).Name())
+	}
+
+	if reflect.TypeOf(logger).String() != "*log.StdLog" {
+		t.Errorf("struct type returned by () should have name *log.StdLog but got: %s", reflect.TypeOf(logger).String())
+	}
+
+	if reflect.TypeOf(*logger).Kind() != reflect.Struct {
+		t.Errorf("type kind returned by () should be struct but got: %s", reflect.TypeOf(logger).Kind())
 	}
 }
 
