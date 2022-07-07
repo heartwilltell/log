@@ -1,6 +1,12 @@
 name: Pull Request
 
 on:
+  release:
+    types:
+      - published
+  push:
+    branches:
+      - master
   pull_request:
     paths-ignore:
       - '.github/workflows/pr.yml'
