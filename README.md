@@ -8,8 +8,7 @@
 ## Documentation
 [![](https://goreportcard.com/badge/github.com/heartwilltell/log)](https://goreportcard.com/report/github.com/heartwilltell/log)
 [![](https://pkg.go.dev/badge/github.com/heartwilltell/log?utm_source=godoc)](https://pkg.go.dev/github.com/heartwilltell/log)
-[![Pull Request](https://github.com/heartwilltell/log/actions/workflows/pr.yml/badge.svg)](https://github.com/heartwilltell/log/actions/workflows/pr.yml)
-[![Pull Request](https://github.com/heartwilltell/log/actions/workflows/pr.yml/badge.svg)](https://github.com/heartwilltell/log/actions/workflows/pr.yml)
+[![Build](https://github.com/heartwilltell/log/actions/workflows/pr.yml/badge.svg?branch=master&event=push)](https://github.com/heartwilltell/log/actions/workflows/pr.yml)
 
 ## Installation
 ```bash
