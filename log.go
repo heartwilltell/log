@@ -24,6 +24,13 @@ const (
 	// DBG represents debug logging level.
 	DBG
 
+	// Short represents format of the code line number.
+	// Contains resulting file name and line number.
+	Short LineNumFormat = iota
+	// Long represents format of the code line number.
+	// Contains full file path, name and line number.
+	Long
+
 	// ErrParseLevel indicates that string given to function ParseLevel can't be parsed to Level.
 	ErrParseLevel Error = "string can't be parsed as Level, use: `error`, `warning`, `info`, `debug`"
 )
@@ -53,6 +60,10 @@ func (l Level) String() string {
 	}[l]
 }
 
+// LineNumFormat represents an enumeration of formats
+// for printing the code line number in log output.
+type LineNumFormat byte
+
 // Error represents package level error related to logging work.
 type Error string
 
@@ -63,7 +74,7 @@ func (e Error) Error() string { return string(e) }
 func New(options ...Option) *StdLog {
 	l := &StdLog{
 		err: log.New(os.Stderr, "\033[31mERR\033[0m: ", log.Ldate|log.Ltime),
-		wrn: log.New(os.Stderr, "\033[34mERR\033[0m: ", log.Ldate|log.Ltime),
+		wrn: log.New(os.Stderr, "\033[33mWRN\033[0m: ", log.Ldate|log.Ltime),
 		inf: log.New(os.Stderr, "\033[32mINF\033[0m: ", log.Ldate|log.Ltime),
 		dbg: log.New(os.Stderr, "\033[35mDBG\033[0m: ", log.Ldate|log.Ltime),
 		lvl: INF,
@@ -124,9 +135,10 @@ func (l *StdLog) Debug(format string, v ...any) {
 // properties.
 type Option func(l *StdLog)
 
-// WithWriter represents a functional option which can be passed
-// to the NewStdLog function to change the underlying writer of
-// StdLog struct to the given on.
+// WithLevel changes the underlying logging level of StdLog to the given on.
+func WithLevel(level Level) Option { return func(l *StdLog) { l.lvl = level } }
+
+// WithWriter changes the writer for each leveled loggers of StdLog to the given on.
 func WithWriter(w io.Writer) Option {
 	return func(l *StdLog) {
 		l.err.SetOutput(w)
@@ -136,12 +148,52 @@ func WithWriter(w io.Writer) Option {
 	}
 }
 
-// WithLevel represents a functional option which can be passed to the NewStdLog
-// function to change the underlying logging level of StdLog struct to the given on.
-func WithLevel(level Level) Option { return func(l *StdLog) { l.lvl = level } }
+// WithNoColor disables the color output of StdLog.
+func WithNoColor() Option {
+	return func(l *StdLog) {
+		l.err.SetPrefix("ERR: ")
+		l.wrn.SetPrefix("WRN: ")
+		l.inf.SetPrefix("INF: ")
+		l.dbg.SetPrefix("DBG: ")
+	}
+}
+
+// WithLineNum enables the printing of code line number in log output.
+func WithLineNum(format LineNumFormat) Option {
+	return func(l *StdLog) {
+		flags := l.inf.Flags() // because all flags are equal for each leveled logger
+
+		switch format {
+		case Short:
+			flags |= log.Lshortfile
+		case Long:
+			flags |= log.Llongfile
+		}
+
+		l.err.SetFlags(flags)
+		l.wrn.SetFlags(flags)
+		l.inf.SetFlags(flags)
+		l.dbg.SetFlags(flags)
+	}
+}
+
+// WithUTC sets the log time format to UTC.
+func WithUTC() Option {
+	return func(l *StdLog) {
+		flags := l.inf.Flags() | log.LUTC
+		l.err.SetFlags(flags)
+		l.wrn.SetFlags(flags)
+		l.inf.SetFlags(flags)
+		l.dbg.SetFlags(flags)
+	}
+}
 
 // ParseLevel takes the string and tries to parse it to the Level.
 func ParseLevel(lvl string) (Level, error) {
+	if lvl == "" {
+		return INF, ErrParseLevel
+	}
+
 	levels := map[string]Level{
 		strings.ToLower(WRN.String()): WRN,
 		strings.ToLower(ERR.String()): ERR,
