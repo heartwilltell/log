@@ -196,7 +196,7 @@ func WithUTC() Option {
 	}
 }
 
-// WithLevelAtPrefixEnd sets the level mark at the end of prefix.
+// WithLevelAtPrefixEnd sets the level mark at the end of log prefix.
 func WithLevelAtPrefixEnd() Option {
 	return func(l *StdLog) {
 		flags := l.inf.Flags() | log.Lmsgprefix
