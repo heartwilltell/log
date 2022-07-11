@@ -95,6 +95,30 @@ func TestNew(t *testing.T) {
 		reflectStdLog(t, got)
 	})
 
+	t.Run("New(WithLevelAtPrefixEnd)", func(t *testing.T) {
+		defaultFlags := log.Ldate | log.Ltime
+		got := New(WithLevelAtPrefixEnd())
+
+		// Magic! I know. I also hate bitwise operators.
+		if (got.err.Flags() ^ log.Lmsgprefix) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		if (got.inf.Flags() ^ log.Lmsgprefix) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		if (got.dbg.Flags() ^ log.Lmsgprefix) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		if (got.wrn.Flags() ^ log.Lmsgprefix) != defaultFlags {
+			t.Errorf("UTC flag hs not been set")
+		}
+
+		reflectStdLog(t, got)
+	})
+
 	t.Run("New(WithLineNum(ShortFmt))", func(t *testing.T) {
 		defaultFlags := log.Ldate | log.Ltime
 		got := New(WithLineNum(ShortFmt))

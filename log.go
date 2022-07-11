@@ -196,6 +196,17 @@ func WithUTC() Option {
 	}
 }
 
+// WithLevelAtPrefixEnd sets the level mark at the end of log prefix.
+func WithLevelAtPrefixEnd() Option {
+	return func(l *StdLog) {
+		flags := l.inf.Flags() | log.Lmsgprefix
+		l.err.SetFlags(flags)
+		l.wrn.SetFlags(flags)
+		l.inf.SetFlags(flags)
+		l.dbg.SetFlags(flags)
+	}
+}
+
 // ParseLevel takes the string and tries to parse it to the Level.
 func ParseLevel(lvl string) (Level, error) {
 	if lvl == "" {

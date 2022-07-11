@@ -95,6 +95,21 @@ logger := log.New(log.WithLineNum(log.LongFmt))
 ```
 ###
 
+👇 Sets the level mark at the end of log prefix.
+```go
+logger := log.New(log.WithLevelAtPrefixEnd())
+```
+Will produce this 👇
+```
+// 2022/07/08 11:22:30 INF: message
+```
+Instead of this 👇
+```
+// INF: 2022/07/08 11:22:30: message
+```
+
+###
+
 👇 Creates nop logger which implements `log.Logger` interface.
 ```go
 logger := log.NewNopLog()
