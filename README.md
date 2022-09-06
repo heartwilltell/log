@@ -1,6 +1,13 @@
 # `log` - Simple leveled logging based on standard log package
 
-![](log.png)
+<p align="center">
+  <img src="log.png" width="800" title="hover text" alt="logo">
+</p>
+
+## Documentation
+[![](https://goreportcard.com/badge/github.com/heartwilltell/log)](https://goreportcard.com/report/github.com/heartwilltell/log)
+[![](https://pkg.go.dev/badge/github.com/heartwilltell/log?utm_source=godoc)](https://pkg.go.dev/github.com/heartwilltell/log)
+[![Build](https://github.com/heartwilltell/log/actions/workflows/pr.yml/badge.svg?branch=master&event=push)](https://github.com/heartwilltell/log/actions/workflows/pr.yml)
 
 ## Benefits
 
@@ -11,10 +18,6 @@
 - 😮‍💨 No global logger
 - 👏 No structured logging bullshit
 
-## Documentation
-[![](https://goreportcard.com/badge/github.com/heartwilltell/log)](https://goreportcard.com/report/github.com/heartwilltell/log)
-[![](https://pkg.go.dev/badge/github.com/heartwilltell/log?utm_source=godoc)](https://pkg.go.dev/github.com/heartwilltell/log)
-[![Build](https://github.com/heartwilltell/log/actions/workflows/pr.yml/badge.svg?branch=master&event=push)](https://github.com/heartwilltell/log/actions/workflows/pr.yml)
 
 ## Installation
 ```bash
