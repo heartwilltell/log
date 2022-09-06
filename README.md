@@ -1,7 +1,7 @@
 # `log` - Simple leveled logging based on standard log package
 
 <p align="center">
-  <img src="log.png" width="800" title="hover text" alt="logo">
+  <img src="https://imagedelivery.net/r-FGMwXlTVvJHWFyznDr1Q/b6462eaf-74a1-4225-8548-45c4c8ea0100/public" width="800" title="hover text" alt="logo">
 </p>
 
 ## Documentation
