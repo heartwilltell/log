@@ -1,4 +1,8 @@
-# `log` - Simple leveled logging wrapper around standard log package
+# `log` - Simple leveled logging based on standard log package
+
+![](log.png)
+
+## Benefits
 
 - 😻 Leveled logging
 - 😚 Simple API
