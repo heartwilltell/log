@@ -8,6 +8,7 @@
 [![](https://goreportcard.com/badge/github.com/heartwilltell/log)](https://goreportcard.com/report/github.com/heartwilltell/log)
 [![](https://pkg.go.dev/badge/github.com/heartwilltell/log?utm_source=godoc)](https://pkg.go.dev/github.com/heartwilltell/log)
 [![Build](https://github.com/heartwilltell/log/actions/workflows/pr.yml/badge.svg?branch=master&event=push)](https://github.com/heartwilltell/log/actions/workflows/pr.yml)
+[![codecov](https://codecov.io/gh/heartwilltell/log/branch/master/graph/badge.svg?token=JFY9EQ4F2A)](https://codecov.io/gh/heartwilltell/log)
 
 ## Benefits
 
