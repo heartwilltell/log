@@ -34,7 +34,13 @@ jobs:
           go-version: '^1.18'
 
       - name: go test
-        run: go test -race -cover ./...
+        run: |
+          go test -race -cover ./... -coverprofile coverage.out -coverpkg ./...
+          go tool cover -func coverage.out -o coverage.out
+
+      - uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.out
 
   lint:
     runs-on: ubuntu-latest
@@ -49,3 +55,4 @@ jobs:
         with:
           version: latest
           args: --timeout=3m
+
