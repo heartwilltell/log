@@ -35,12 +35,10 @@ jobs:
 
       - name: go test
         run: |
-          go test -race -cover ./... -coverprofile coverage.out -coverpkg ./...
-          go tool cover -func coverage.out -o coverage.out
+          go test -race -cover ./... -covermode=atomic -coverprofile coverage.out
 
-      - uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.out
+      - name: Upload coverage file
+        uses: codecov/codecov-action@v3
 
   lint:
     runs-on: ubuntu-latest
