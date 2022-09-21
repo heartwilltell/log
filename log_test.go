@@ -10,6 +10,7 @@ import (
 	"testing"
 )
 
+//nolint:gocognit
 func TestNew(t *testing.T) {
 	t.Run("New()", func(t *testing.T) {
 		got := New()
