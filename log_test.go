@@ -101,19 +101,19 @@ func TestNew(t *testing.T) {
 
 		// Magic! I know. I also hate bitwise operators.
 		if (got.err.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
+			t.Errorf("LevelAtPrefixEnd flag hs not been set")
 		}
 
 		if (got.inf.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
+			t.Errorf("LevelAtPrefixEnd flag hs not been set")
 		}
 
 		if (got.dbg.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
+			t.Errorf("LevelAtPrefixEnd flag hs not been set")
 		}
 
 		if (got.wrn.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
+			t.Errorf("LevelAtPrefixEnd flag hs not been set")
 		}
 
 		reflectStdLog(t, got)
@@ -125,7 +125,7 @@ func TestNew(t *testing.T) {
 
 		// Magic! I know. I also hate bitwise operators.
 		if (got.err.Flags() ^ log.Lshortfile) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
+			t.Errorf("LineNum flag hs not been set")
 		}
 
 		reflectStdLog(t, got)
@@ -137,7 +137,7 @@ func TestNew(t *testing.T) {
 
 		// Magic! I know. I also hate bitwise operators.
 		if (got.err.Flags() ^ log.Llongfile) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
+			t.Errorf("LineNum flag hs not been set")
 		}
 
 		reflectStdLog(t, got)
@@ -151,9 +151,7 @@ func TestNewStdLog(t *testing.T) {
 }
 
 func TestLevelPrinting(t *testing.T) {
-	type tcase struct {
-		level Level
-	}
+	type tcase struct{ level Level }
 
 	tests := map[string]tcase{
 		"DBG":  {level: DBG},
@@ -177,62 +175,77 @@ func TestLevelPrinting(t *testing.T) {
 
 			switch tc.level {
 			case ERR:
-				if len(lines)-int(ERR) != 1 {
-					t.Errorf("Unexpected number of printed lines: want := %d got := %d", ERR+1, len(lines)-int(ERR))
-				}
-
-				for _, l := range lines {
-					if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") {
-						continue
-					}
-
-					t.Errorf("Unexpected printed line! Only ERR logs are alowed in this case. Got := %s", w.String())
-				}
-
+				checkErrorLevelPrinting(t, lines, w)
 			case WRN:
-				if len(lines)-int(WRN) != 1 {
-					t.Errorf("Unexpected number of printed lines: want := %d got := %d", WRN+1, len(lines)-int(WRN))
-				}
-
-				for _, l := range lines {
-					if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") ||
-						strings.HasPrefix(l, "\u001B[33mWRN\u001B[0m:") {
-						continue
-					}
-
-					t.Errorf("Unexpected printed line! Only ERR and WRN logs are alowed in this case. Got := %s", w.String())
-				}
+				checkWarningLevelPrinting(t, lines, w)
 			case INF:
-				if len(lines)-int(INF) != 1 {
-					t.Errorf("Unexpected number of printed lines: want := %d got := %d", INF+1, len(lines)-int(INF))
-				}
-
-				for _, l := range lines {
-					if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") ||
-						strings.HasPrefix(l, "\u001B[33mWRN\u001B[0m:") ||
-						strings.HasPrefix(l, "\u001B[32mINF\u001B[0m:") {
-						continue
-					}
-
-					t.Errorf("Unexpected printed line! Only ERR WRN INF logs are alowed in this case. Got := %s", w.String())
-				}
+				checkInfoLevelPrinting(t, lines, w)
 			case DBG:
-				if len(lines)-int(DBG) != 1 {
-					t.Errorf("Unexpected number of printed lines: want := %d got := %d", DBG+1, len(lines)-int(DBG))
-				}
-
-				for _, l := range lines {
-					if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") ||
-						strings.HasPrefix(l, "\u001B[33mWRN\u001B[0m:") ||
-						strings.HasPrefix(l, "\u001B[32mINF\u001B[0m:") ||
-						strings.HasPrefix(l, "\u001B[35mDBG\u001B[0m:") {
-						continue
-					}
-
-					t.Errorf("Unexpected printed line! Only ERR WRN INF logs are alowed in this case. Got := %s", w.String())
-				}
+				checkDebugLevelPrinting(t, lines, w)
 			}
 		})
+	}
+}
+
+func checkErrorLevelPrinting(t *testing.T, lines []string, w bytes.Buffer) {
+	if len(lines)-int(ERR) != 1 {
+		t.Errorf("Unexpected number of printed lines: want := %d got := %d", ERR+1, len(lines)-int(ERR))
+	}
+
+	for _, l := range lines {
+		if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") {
+			continue
+		}
+
+		t.Errorf("Unexpected printed line! Only ERR logs are allowed in this case. Got := %s", w.String())
+	}
+}
+
+func checkWarningLevelPrinting(t *testing.T, lines []string, w bytes.Buffer) {
+	if len(lines)-int(WRN) != 1 {
+		t.Errorf("Unexpected number of printed lines: want := %d got := %d", WRN+1, len(lines)-int(WRN))
+	}
+
+	for _, l := range lines {
+		if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") ||
+			strings.HasPrefix(l, "\u001B[33mWRN\u001B[0m:") {
+			continue
+		}
+
+		t.Errorf("Unexpected printed line! Only ERR and WRN logs are allowed in this case. Got := %s", w.String())
+	}
+}
+
+func checkInfoLevelPrinting(t *testing.T, lines []string, w bytes.Buffer) {
+	if len(lines)-int(INF) != 1 {
+		t.Errorf("Unexpected number of printed lines: want := %d got := %d", INF+1, len(lines)-int(INF))
+	}
+
+	for _, l := range lines {
+		if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") ||
+			strings.HasPrefix(l, "\u001B[33mWRN\u001B[0m:") ||
+			strings.HasPrefix(l, "\u001B[32mINF\u001B[0m:") {
+			continue
+		}
+
+		t.Errorf("Unexpected printed line! Only ERR WRN INF logs are allowed in this case. Got := %s", w.String())
+	}
+}
+
+func checkDebugLevelPrinting(t *testing.T, lines []string, w bytes.Buffer) {
+	if len(lines)-int(DBG) != 1 {
+		t.Errorf("Unexpected number of printed lines: want := %d got := %d", DBG+1, len(lines)-int(DBG))
+	}
+
+	for _, l := range lines {
+		if strings.HasPrefix(l, "\u001B[31mERR\u001B[0m:") ||
+			strings.HasPrefix(l, "\u001B[33mWRN\u001B[0m:") ||
+			strings.HasPrefix(l, "\u001B[32mINF\u001B[0m:") ||
+			strings.HasPrefix(l, "\u001B[35mDBG\u001B[0m:") {
+			continue
+		}
+
+		t.Errorf("Unexpected printed line! Only ERR WRN INF logs are allowed in this case. Got := %s", w.String())
 	}
 }
 
@@ -317,9 +330,7 @@ func TestNewNopLog(t *testing.T) {
 }
 
 func TestNopLogPrinting(t *testing.T) {
-	type tcase struct {
-		method func(string, ...any)
-	}
+	type tcase struct{ method func(string, ...any) }
 
 	tests := map[string]tcase{
 		"Info":    {method: NewNopLog().Info},
@@ -367,5 +378,6 @@ func (w *testWriter) Write(p []byte) (n int, err error) {
 		w.byf = append(w.byf, b)
 		w.n = i
 	}
+
 	return w.n, nil
 }

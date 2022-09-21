@@ -1,15 +1,14 @@
 run:
-  # include test files or not, default is true
-  tests: false
+  tests: true # include test files or not, default is true
+  go: '1.19'
 
 linters:
   enable:
-    - deadcode # Finds unused code.
     - errcheck # Checks for unchecked errors in api programs.
     - gosimple # Linter for Go source code that specializes in simplifying a code.
     - govet # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string.
     - ineffassign # Detects when assignments to existing variables are not used.
-    - staticcheck # Staticcheck is a api vet on steroids, applying a ton of static analysis checks.
+    - staticcheck # Staticcheck is a api vet on steroids, applying a ton of assets analysis checks.
     - structcheck # Finds unused struct fields.
     - typecheck # Like the front-end of a Go compiler, parses and type-checks Go code.
     - unused # Checks for unused constants, variables, functions and types.
@@ -46,12 +45,19 @@ linters:
     - nolintlint # Reports ill-formed or insufficient nolint directives
     - rowserrcheck # checks whether Err of rows is checked successfully
     - sqlclosecheck # Checks that sql.Rows and sql.Stmt are closed.
-    - testpackage # linter that makes you use a separate _test package
     - paralleltest # paralleltest detects missing usage of t.Parallel() method in your Go test
     - tparallel # tparallel detects inappropriate usage of t.Parallel() method in your Go test codes
-  disable:
-    - wrapcheck # Checks that errors returned from external packages are wrapped.
     - wsl # Whitespace Linter - Forces you to use empty lines!
+
+  disable:
+    # DEPRECATED
+    # ==========
+    - deadcode # Finds unused code.
+
+    # DISABLED
+    # ==========
+    - testpackage # linter that makes you use a separate _test package
+    - wrapcheck # Checks that errors returned from external packages are wrapped
     - gochecknoglobals # check that no global variables exist
     - forbidigo # Forbids identifiers
     - gci # Gci control golang package import order and make it always deterministic.
@@ -66,12 +72,10 @@ linters:
     - thelper # thelper detects golang test helpers without t.Helper() call and checks the consistency of test helpers
 
 linters-settings:
-  golint:
-    # minimal confidence for issues, default is 0.8
-    min-confidence: 0.9
-
-  staticcheck:
-    go: "1.18"
+  paralleltest:
+    # Ignore missing calls to `t.Parallel()` and only report incorrect uses of it.
+    # Default: false
+    ignore-missing: true
 
   revive:
     # see https://github.com/mgechev/revive#available-rules for details.
@@ -86,26 +90,7 @@ linters-settings:
         arguments:
           - maxLitCount: "5"
             allowStrs: '""'
-            allowInts: "0,1,2,3,4,5,500"
-            allowFloats: "0.0,0.,1.0,1.,2.0,2.,0.95,0.99"
-
-  wrapcheck:
-    # An array of strings that specify substrings of signatures to ignore.
-    # If this set, it will override the default set of ignored signatures.
-    # See https://github.com/tomarrell/wrapcheck#configuration for more information.
-    ignoreSigs:
-      - ctx.Err(
-      - .Errorf(
-      - errors.New(
-      - errors.Unwrap(
-      - .Wrap(
-      - .Wrapf(
-      - .WithMessage(
-      - .WithMessagef(
-      - .WithStack(
-    ignorePackageGlobs:
-      - encoding/*
-      - github.com/pkg/*
+            allowInts: "0,1,2,3,4,5,10,20,30,500"
 
   wsl:
     # See https://github.com/bombsimon/wsl/blob/master/doc/configuration.md for
