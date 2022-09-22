@@ -10,111 +10,96 @@ import (
 	"testing"
 )
 
-//nolint:gocognit
 func TestNew(t *testing.T) {
-	t.Run("New()", func(t *testing.T) {
-		got := New()
-		if got.lvl != INF {
-			t.Errorf("default log lvl should be INF but got %s", got.lvl.String())
-		}
+	got := New()
+	if got.lvl != INF {
+		t.Errorf("default log lvl should be INF but got %s", got.lvl.String())
+	}
 
-		if got.err.Writer() != os.Stderr || got.inf.Writer() != os.Stderr || got.dbg.Writer() != os.Stderr {
-			t.Errorf("all default writers should be os.Stderr")
-		}
+	if got.err.Writer() != os.Stderr || got.inf.Writer() != os.Stderr || got.dbg.Writer() != os.Stderr {
+		t.Errorf("all default writers should be os.Stderr")
+	}
 
-		reflectStdLog(t, got)
-	})
+	reflectStdLog(t, got)
+}
 
-	t.Run("New(WithWriter)", func(t *testing.T) {
-		tb := &testWriter{byf: make([]byte, 0, 20)}
-		strToLog := "test string"
-		got := New(WithWriter(tb))
-		got.Info(strToLog)
+func TestNewWithNoColor(t *testing.T) {
+	got := New(WithNoColor())
+	if got.err.Prefix() != "ERR: " {
+		t.Errorf("Unexpected ERR prefix := %s, expcted := 'ERR: '", got.err.Prefix())
+	}
 
-		if got.err.Writer() != tb || got.inf.Writer() != tb || got.dbg.Writer() != tb {
-			t.Errorf("all default writers should be os.Stderr")
-		}
+	if got.wrn.Prefix() != "WRN: " {
+		t.Errorf("Unexpected WRN prefix := %s, expcted := 'WRN: '", got.wrn.Prefix())
+	}
 
-		if !strings.Contains(tb.String(), strToLog) {
-			t.Errorf("expected %s but got %s", strToLog, tb.String())
-		}
+	if got.inf.Prefix() != "INF: " {
+		t.Errorf("Unexpected INF prefix := %s, expcted := 'INF: '", got.inf.Prefix())
+	}
 
-		reflectStdLog(t, got)
-	})
+	if got.dbg.Prefix() != "DBG: " {
+		t.Errorf("Unexpected DBG prefix := %s, expcted := 'DBG: '", got.dbg.Prefix())
+	}
 
-	t.Run("New(WithLevel)", func(t *testing.T) {
-		got := New(WithLevel(ERR))
-		if got.lvl != ERR {
-			t.Errorf("log lvl should be := ERR got := %s", got.lvl.String())
-		}
+	reflectStdLog(t, got)
+}
 
-		reflectStdLog(t, got)
-	})
+func TestNewWithUTC(t *testing.T) {
+	defaultFlags := log.Ldate | log.Ltime
+	got := New(WithUTC())
 
-	t.Run("New(WithNoColor)", func(t *testing.T) {
-		got := New(WithNoColor())
-		if got.err.Prefix() != "ERR: " {
-			t.Errorf("Unexpected ERR prefix := %s, expcted := 'ERR: '", got.err.Prefix())
-		}
+	// Magic! I know. I also hate bitwise operators.
+	if (got.err.Flags() ^ log.LUTC) != defaultFlags {
+		t.Errorf("UTC flag hs not been set")
+	}
 
-		if got.wrn.Prefix() != "WRN: " {
-			t.Errorf("Unexpected WRN prefix := %s, expcted := 'WRN: '", got.wrn.Prefix())
-		}
+	if (got.inf.Flags() ^ log.LUTC) != defaultFlags {
+		t.Errorf("UTC flag hs not been set")
+	}
 
-		if got.inf.Prefix() != "INF: " {
-			t.Errorf("Unexpected INF prefix := %s, expcted := 'INF: '", got.inf.Prefix())
-		}
+	if (got.dbg.Flags() ^ log.LUTC) != defaultFlags {
+		t.Errorf("UTC flag hs not been set")
+	}
 
-		if got.dbg.Prefix() != "DBG: " {
-			t.Errorf("Unexpected DBG prefix := %s, expcted := 'DBG: '", got.dbg.Prefix())
-		}
+	if (got.wrn.Flags() ^ log.LUTC) != defaultFlags {
+		t.Errorf("UTC flag hs not been set")
+	}
 
-		reflectStdLog(t, got)
-	})
+	reflectStdLog(t, got)
+}
 
-	t.Run("New(WithUTC)", func(t *testing.T) {
+func TestNewWithLevelAtPrefixEnd(t *testing.T) {
+	defaultFlags := log.Ldate | log.Ltime
+	got := New(WithLevelAtPrefixEnd())
+
+	// Magic! I know. I also hate bitwise operators.
+	if (got.err.Flags() ^ log.Lmsgprefix) != defaultFlags {
+		t.Errorf("LevelAtPrefixEnd flag hs not been set")
+	}
+
+	if (got.inf.Flags() ^ log.Lmsgprefix) != defaultFlags {
+		t.Errorf("LevelAtPrefixEnd flag hs not been set")
+	}
+
+	if (got.dbg.Flags() ^ log.Lmsgprefix) != defaultFlags {
+		t.Errorf("LevelAtPrefixEnd flag hs not been set")
+	}
+
+	if (got.wrn.Flags() ^ log.Lmsgprefix) != defaultFlags {
+		t.Errorf("LevelAtPrefixEnd flag hs not been set")
+	}
+
+	reflectStdLog(t, got)
+}
+
+func TestNewWithLineNum(t *testing.T) {
+	t.Run("New(WithLineNum(LongFmt))", func(t *testing.T) {
 		defaultFlags := log.Ldate | log.Ltime
-		got := New(WithUTC())
+		got := New(WithLineNum(LongFmt))
 
 		// Magic! I know. I also hate bitwise operators.
-		if (got.err.Flags() ^ log.LUTC) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
-		}
-
-		if (got.inf.Flags() ^ log.LUTC) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
-		}
-
-		if (got.dbg.Flags() ^ log.LUTC) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
-		}
-
-		if (got.wrn.Flags() ^ log.LUTC) != defaultFlags {
-			t.Errorf("UTC flag hs not been set")
-		}
-
-		reflectStdLog(t, got)
-	})
-
-	t.Run("New(WithLevelAtPrefixEnd)", func(t *testing.T) {
-		defaultFlags := log.Ldate | log.Ltime
-		got := New(WithLevelAtPrefixEnd())
-
-		// Magic! I know. I also hate bitwise operators.
-		if (got.err.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("LevelAtPrefixEnd flag hs not been set")
-		}
-
-		if (got.inf.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("LevelAtPrefixEnd flag hs not been set")
-		}
-
-		if (got.dbg.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("LevelAtPrefixEnd flag hs not been set")
-		}
-
-		if (got.wrn.Flags() ^ log.Lmsgprefix) != defaultFlags {
-			t.Errorf("LevelAtPrefixEnd flag hs not been set")
+		if (got.err.Flags() ^ log.Llongfile) != defaultFlags {
+			t.Errorf("LineNum flag hs not been set")
 		}
 
 		reflectStdLog(t, got)
@@ -131,18 +116,32 @@ func TestNew(t *testing.T) {
 
 		reflectStdLog(t, got)
 	})
+}
 
-	t.Run("New(WithLineNum(LongFmt))", func(t *testing.T) {
-		defaultFlags := log.Ldate | log.Ltime
-		got := New(WithLineNum(LongFmt))
+func TestNewWithLevel(t *testing.T) {
+	got := New(WithLevel(ERR))
+	if got.lvl != ERR {
+		t.Errorf("log lvl should be := ERR got := %s", got.lvl.String())
+	}
 
-		// Magic! I know. I also hate bitwise operators.
-		if (got.err.Flags() ^ log.Llongfile) != defaultFlags {
-			t.Errorf("LineNum flag hs not been set")
-		}
+	reflectStdLog(t, got)
+}
 
-		reflectStdLog(t, got)
-	})
+func TestNewWithWriter(t *testing.T) {
+	tb := &testWriter{byf: make([]byte, 0, 20)}
+	strToLog := "test string"
+	got := New(WithWriter(tb))
+	got.Info(strToLog)
+
+	if got.err.Writer() != tb || got.inf.Writer() != tb || got.dbg.Writer() != tb {
+		t.Errorf("all default writers should be os.Stderr")
+	}
+
+	if !strings.Contains(tb.String(), strToLog) {
+		t.Errorf("expected %s but got %s", strToLog, tb.String())
+	}
+
+	reflectStdLog(t, got)
 }
 
 func TestNewStdLog(t *testing.T) {
