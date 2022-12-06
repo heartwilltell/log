@@ -166,6 +166,19 @@ func WithNoColor() Option {
 	}
 }
 
+func WithNoDateTime() Option {
+	return func(l *StdLog) {
+		flags := l.inf.Flags()
+		flags &= log.Ldate
+		flags &= log.Ltime
+
+		l.err.SetFlags(flags)
+		l.wrn.SetFlags(flags)
+		l.inf.SetFlags(flags)
+		l.dbg.SetFlags(flags)
+	}
+}
+
 // WithLineNum enables the printing of code line number in log output.
 func WithLineNum(format LineNumFmt) Option {
 	return func(l *StdLog) {
