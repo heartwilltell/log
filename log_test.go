@@ -68,6 +68,29 @@ func TestNewWithUTC(t *testing.T) {
 	reflectStdLog(t, got)
 }
 
+func TestNewWithNoDateTime(t *testing.T) {
+	expectedFlags := 0
+	got := New(WithNoDateTime())
+
+	if got.err.Flags() != expectedFlags {
+		t.Errorf("log.Ltime and log.Ldate flags has not been removed from logger")
+	}
+
+	if got.inf.Flags() != expectedFlags {
+		t.Errorf("log.Ltime and log.Ldate flags has not been removed from logger")
+	}
+
+	if got.dbg.Flags() != expectedFlags {
+		t.Errorf("log.Ltime and log.Ldate flags has not been removed from logger")
+	}
+
+	if got.wrn.Flags() != expectedFlags {
+		t.Errorf("log.Ltime and log.Ldate flags has not been removed from logger")
+	}
+
+	reflectStdLog(t, got)
+}
+
 func TestNewWithLevelAtPrefixEnd(t *testing.T) {
 	defaultFlags := log.Ldate | log.Ltime
 	got := New(WithLevelAtPrefixEnd())
