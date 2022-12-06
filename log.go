@@ -166,6 +166,7 @@ func WithNoColor() Option {
 	}
 }
 
+// WithNoDateTime disables the output of date and time of StdLog.
 func WithNoDateTime() Option {
 	return func(l *StdLog) {
 		flags := l.inf.Flags()
